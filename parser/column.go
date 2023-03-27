@@ -2,18 +2,22 @@ package parser
 
 import (
 	"github.com/davidkhala/goutils"
+	"github.com/pingcap/log"
 	"github.com/pingcap/tidb/parser"
 	"github.com/pingcap/tidb/parser/ast"
 	_ "github.com/pingcap/tidb/parser/test_driver"
 )
 
-func parse(sql string) *ast.StmtNode {
+func Parse(sql string) []ast.StmtNode {
 	p := parser.New()
 
-	stmtNodes, _, err := p.Parse(sql, "", "")
+	stmtNodes, warns, err := p.Parse(sql, "", "")
 	goutils.PanicError(err)
+	for _, warn := range warns {
+		log.Warn(warn.Error())
+	}
 
-	return &stmtNodes[0]
+	return stmtNodes
 }
 
 type colX struct {
