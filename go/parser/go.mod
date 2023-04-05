@@ -1,4 +1,4 @@
-module github.com/davidkhala/sql/parser
+module github.com/davidkhala/sql/go/parser
 
 go 1.20
 
