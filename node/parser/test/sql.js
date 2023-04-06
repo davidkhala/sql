@@ -30,9 +30,9 @@ describe('basic usage', () => {
 });
 describe('traverse: dev cases', () => {
     class Visitor extends SqlParserVisitor {
-        visitDmlStatement(context) {
+        visitInsertStatement(context) {
             consolePrintVisitor(context)
-            super.visitDmlStatement(context)
+            super.visitInsertStatement(context)
         }
         visitDdlStatement(context){
             consolePrintVisitor(context)
