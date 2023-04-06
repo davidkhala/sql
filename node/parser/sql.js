@@ -1,4 +1,4 @@
-import {GenericSQL, SqlParserVisitor} from 'dt-sql-parser';
+import {GenericSQL, SqlParserVisitor as _SqlParserVisitor} from 'dt-sql-parser';
 import * as assert from "assert";
 
 const parser = new GenericSQL();
@@ -17,25 +17,39 @@ export function parse(sql, pretty) {
 
 }
 
-const defaultVisitor = (data, context) => {
-    console.info(data)
+export function getStart(context) {
+    const {start, stop, source} = context.start
+    const fullStr = source[1].strdata
+    return fullStr.substring(start, stop + 1)
 }
 
-export function traverse(sql, onTable = defaultVisitor, onSelect = defaultVisitor) {
+export function getStop(context) {
+    const {start, stop, source} = context.stop
+    const fullStr = source[1].strdata
+    return fullStr.substring(start, stop + 1)
+}
 
-    class AbstractVisitor extends SqlParserVisitor {
-        // overwrite visitTableName
-        visitTableName(context) {
-            const tableName = context.getText()
-            onTable(tableName, context)
-        }
-
-        // overwrite visitSelectElements
-        visitSelectElements(context) {
-            const selectElements = context.getText()
-            onSelect(selectElements, context)
-        }
+export function getText(context) {
+    if (!context.start) {
+        assert.ok(context.symbol)
+        return context.getText()
     }
+    const {start, source} = context.start
+    const {stop} = context.stop
+    const fullStr = source[1].strdata
+    return fullStr.substring(start, stop + 1)
+}
+
+
+export const SqlParserVisitor = _SqlParserVisitor
+
+/**
+ *
+ * @param sql
+ * @param {function} AbstractVisitor a class inherit SqlParserVisitor
+ * @returns {AbstractVisitor}
+ */
+export function traverse(sql, AbstractVisitor) {
 
     const tree = parser.parse(sql)
     const visitor = new AbstractVisitor()
