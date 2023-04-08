@@ -1,13 +1,15 @@
 import {atomicClass} from "./context.js";
 
-export function traverseChildren(context, acceptChild, processChild) {
+export function traverseChildren(context, processChild, visitor) {
     const className = context.constructor.name
     if (context.children && !atomicClass.includes(className)) {
         for (const child of context.children) {
-            if (acceptChild(child, context)) {
-                processChild(child, context)
-            }
+            processChild(child, visitor)
+            traverseChildren(child, processChild, visitor)
         }
-
     }
+}
+
+export function expectTrace(context, expectedTrace) {
+    return expectedTrace.length === 0 || context.constructor.name === expectedTrace.pop() && expectTrace(context.parentCtx, expectedTrace)
 }

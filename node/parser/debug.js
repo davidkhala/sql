@@ -1,15 +1,14 @@
-import {getText} from './context.js'
 import {traverseChildren} from './traverse.js'
 
-export function consolePrintVisitor(context) {
+export function consolePrintVisitor(context, visitor) {
     context.prefix = [context.constructor.name]
-    const acceptChild = () => true
-    const processChild = (child, parentContext) => {
-        child.prefix = [...parentContext.prefix, '->', child.constructor.name]
-        console.debug(...child.prefix, getText(child))
 
-        traverseChildren(child, acceptChild, processChild)
+    const processChild = (child) => {
+        const parentContext = child.parentCtx
+        child.prefix = [...parentContext.prefix, '->', child.constructor.name]
+        console.debug(...child.prefix, visitor.getText(child))
+
     }
-    traverseChildren(context, acceptChild, processChild)
+    traverseChildren(context, processChild, visitor)
 
 }

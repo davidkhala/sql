@@ -1,5 +1,7 @@
-import {parse, validate, traverse, SqlParserVisitor} from '../sql.js'
+import {parse, validate, traverse, AbstractVisitor} from '../sql.js'
 import {consolePrintVisitor} from '../debug.js'
+import {insertVisitor} from "../insert.js";
+import assert from "assert";
 
 describe('basic usage', () => {
     const correctSql = 'SELECT id,name from user1;';
@@ -11,7 +13,7 @@ describe('basic usage', () => {
         console.info(tokens)
     })
     it('traverse', () => {
-        class Visitor extends SqlParserVisitor {
+        class Visitor extends AbstractVisitor {
 
             visitTableName(context) {
                 consolePrintVisitor(context)
@@ -29,13 +31,13 @@ describe('basic usage', () => {
     })
 });
 describe('traverse: dev cases', () => {
-    class Visitor extends SqlParserVisitor {
+    class Visitor extends AbstractVisitor {
         visitInsertStatement(context) {
-            consolePrintVisitor(context)
+            insertVisitor(context, this)
             super.visitInsertStatement(context)
         }
         visitDdlStatement(context){
-            consolePrintVisitor(context)
+            consolePrintVisitor(context, this)
             super.visitDdlStatement(context)
         }
 
@@ -44,17 +46,13 @@ describe('traverse: dev cases', () => {
     it('insert into', () => {
         const sql = `INSERT INTO returned_orders (order_id, order_date, total_return)
                      SELECT order_id, order_date, total
-                     FROM orders
-                     WHERE type = 'return'`
-        traverse(sql, Visitor)
+                     FROM orders WHERE type = 'return'`
+        const dbtSQL = `SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM orders WHERE type = 'return'`
+        const visitor = traverse(sql, Visitor)
+        assert.equal(visitor.dbt, dbtSQL)
 
-        // TODO
 
-        // SELECT
-        //     order_id as order_id,
-        //     order_date as order_date,
-        //     total as total_return
-        // FROM {{ ref('orders') }} WHERE type = 'return'
+
 
     })
 

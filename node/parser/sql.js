@@ -1,4 +1,4 @@
-import {GenericSQL, SqlParserVisitor as _SqlParserVisitor} from 'dt-sql-parser';
+import {GenericSQL, SqlParserVisitor} from 'dt-sql-parser';
 import * as assert from "assert";
 
 const parser = new GenericSQL();
@@ -18,10 +18,6 @@ export function parse(sql, pretty) {
 }
 
 
-
-
-export const SqlParserVisitor = _SqlParserVisitor
-
 /**
  *
  * @param sql
@@ -31,11 +27,27 @@ export const SqlParserVisitor = _SqlParserVisitor
 export function traverse(sql, AbstractVisitor) {
 
     const tree = parser.parse(sql)
-    const visitor = new AbstractVisitor()
+    const visitor = new AbstractVisitor(sql)
     visitor.visit(tree)
-
     return visitor
 }
 
+export class AbstractVisitor extends SqlParserVisitor {
+    constructor(sql) {
+        super();
+        this.source = sql
+    }
+
+    getText(context) {
+        if (!context.start) {
+            assert.ok(context.symbol)
+            return context.getText()
+        }
+        const {start} = context.start
+        const {stop} = context.stop
+        return this.source.substring(start, stop + 1)
+    }
+
+}
 
 
