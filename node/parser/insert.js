@@ -1,27 +1,28 @@
-import {expectTrace, traverseChildren} from "./traverse.js";
-import {reduce} from "./dbt/insert.js";
-
-export function insertVisitor(context, visitor) {
-    visitor.result = {
-        uidList: [],
-        selectColumnElementList: [],
-        fromClause: undefined,
-    }
-
-    traverseChildren(context, processInsert, visitor)
-
-    visitor.dbt = reduce(visitor.result)
-}
+import {expectTrace} from "./traverse.js";
+import {getEnd} from "./context.js";
 
 
 export function processInsert(context, visitor) {
+    const result = visitor.result.insert
     if (expectTrace(context, ['InsertStatementContext', 'UidListContext', 'UidContext'])) {
-        visitor.result.uidList.push(visitor.getText(context))
+
+        result.uidList.push(visitor.getText(context))
     }
     if (expectTrace(context, ['InsertStatementContext', 'InsertStatementValueContext', 'SimpleSelectContext', 'QuerySpecificationContext', 'SelectElementsContext', 'SelectColumnElementContext'])) {
-        visitor.result.selectColumnElementList.push(visitor.getText(context))
+        result.selectColumnElementList.push(visitor.getText(context))
     }
     if (expectTrace(context, ['InsertStatementContext', 'InsertStatementValueContext', 'SimpleSelectContext', 'QuerySpecificationContext', 'FromClauseContext'])) {
-        visitor.result.fromClause = visitor.getText(context)
+        result.fromClause = {
+            text: visitor.getText(context),
+            stop: getEnd(context),
+        }
+
+    }
+    if (expectTrace(context, ['InsertStatementContext', 'InsertStatementValueContext', 'SimpleSelectContext', 'QuerySpecificationContext', 'FromClauseContext', 'TableSourcesContext'])) {
+        result.table = {
+            text:visitor.getText(context),
+            stop: getEnd(context),
+        }
+
     }
 }

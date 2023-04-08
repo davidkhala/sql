@@ -20,22 +20,18 @@ export function parse(sql, pretty) {
 
 /**
  *
- * @param sql
- * @param {function} AbstractVisitor a class inherit SqlParserVisitor
+ * @param {AbstractVisitor} visitor a class inherit SqlParserVisitor
  * @returns {AbstractVisitor}
  */
-export function traverse(sql, AbstractVisitor) {
-
-    const tree = parser.parse(sql)
-    const visitor = new AbstractVisitor(sql)
+export function traverse(visitor) {
+    const tree = parser.parse(visitor.sql)
     visitor.visit(tree)
-    return visitor
 }
 
 export class AbstractVisitor extends SqlParserVisitor {
     constructor(sql) {
         super();
-        this.source = sql
+        this.sql = sql
     }
 
     getText(context) {
@@ -45,7 +41,7 @@ export class AbstractVisitor extends SqlParserVisitor {
         }
         const {start} = context.start
         const {stop} = context.stop
-        return this.source.substring(start, stop + 1)
+        return this.sql.substring(start, stop + 1)
     }
 
 }
