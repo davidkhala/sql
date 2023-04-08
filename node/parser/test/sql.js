@@ -16,12 +16,12 @@ describe('basic usage', () => {
         class Visitor extends AbstractVisitor {
 
             visitTableName(context) {
-                consolePrintVisitor(context)
+                consolePrintVisitor(context, this)
                 super.visitTableName(context)
             }
 
             visitFromClause(context) {
-                consolePrintVisitor(context)
+                consolePrintVisitor(context, this)
                 super.visitFromClause(context)
             }
 
@@ -36,23 +36,22 @@ describe('traverse: dev cases', () => {
             insertVisitor(context, this)
             super.visitInsertStatement(context)
         }
-        visitDdlStatement(context){
+
+        visitDdlStatement(context) {
             consolePrintVisitor(context, this)
             super.visitDdlStatement(context)
         }
 
     }
 
-    it('insert into', () => {
+    it('dbt insert into', () => {
         const sql = `INSERT INTO returned_orders (order_id, order_date, total_return)
                      SELECT order_id, order_date, total
-                     FROM orders WHERE type = 'return'`
+                     FROM orders
+                     WHERE type = 'return'`
         const dbtSQL = `SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM orders WHERE type = 'return'`
         const visitor = traverse(sql, Visitor)
         assert.equal(visitor.dbt, dbtSQL)
-
-
-
 
     })
 
