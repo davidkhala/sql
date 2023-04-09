@@ -12,4 +12,4 @@ export function getStop(context, visitor) {
     return visitor.source.substring(start, stop + 1)
 }
 
-export const atomicClass = ['TableNameContext', 'UidContext', 'SelectColumnElementContext', 'TableSourcesContext', 'ExpressionAtomPredicateContext', 'ComparisonOperatorContext']
+export const atomicContextClassSet = new Set(['TableNameContext', 'UidContext', 'SelectColumnElementContext', 'TableSourcesContext', 'ExpressionAtomPredicateContext', 'ComparisonOperatorContext','FullColumnNameContext'])

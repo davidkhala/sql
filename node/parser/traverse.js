@@ -1,8 +1,8 @@
-import {atomicClass} from "./context.js";
+import {atomicContextClassSet} from "./context.js";
 
 export function traverseChildren(context, processChild, visitor) {
     const className = context.constructor.name
-    if (context.children && !atomicClass.includes(className)) {
+    if (context.children && !atomicContextClassSet.has(className)) {
         for (const child of context.children) {
             processChild(child, visitor)
             traverseChildren(child, processChild, visitor)

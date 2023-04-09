@@ -1,7 +1,8 @@
 import {AbstractVisitor} from "../sql.js";
-import {processInsert} from "../insert.js";
+import {processInsert, reduceInsert} from "./insert.js";
 import {consolePrintVisitor} from "../debug.js";
 import {traverseChildren} from "../traverse.js";
+import {processUpdate, reduceUpdate} from "./update.js";
 
 export class DBTVisitor extends AbstractVisitor {
     constructor(sql, {useRefTable = true} = {}) {
@@ -9,7 +10,7 @@ export class DBTVisitor extends AbstractVisitor {
         Object.assign(this, {useRefTable, result: {}})
     }
 
-    visitInsertStatement(context) {
+    visitInsertStatement(ctx) {
         this.result.insert = {
             uidList: [],
             selectColumnElementList: [],
@@ -17,10 +18,19 @@ export class DBTVisitor extends AbstractVisitor {
             table: undefined,
         }
 
-        traverseChildren(context, processInsert, this)
-        this.dbt = this.reduceInsert()
+        traverseChildren(ctx, processInsert, this)
+        this.dbt = reduceInsert(this)
 
-        return super.visitInsertStatement(context)
+        return super.visitInsertStatement(ctx)
+    }
+
+    visitUpdateStatement(ctx) {
+        this.result.update = {
+            columns: {},
+        }
+        traverseChildren(ctx, processUpdate, this)
+        this.dbt = reduceUpdate(this)
+        return super.visitUpdateStatement(ctx);
     }
 
     visitDdlStatement(context) {
@@ -28,21 +38,5 @@ export class DBTVisitor extends AbstractVisitor {
         return super.visitDdlStatement(context)
     }
 
-    reduceInsert() {
-        const {uidList, selectColumnElementList, fromClause, table} = this.result.insert
-
-
-        const part1 = uidList.reduce((sum, uid, index) => {
-            sum += `\t${selectColumnElementList[index]} AS ${uid}${index === uidList.length - 1 ? '' : ','}\n`
-
-            return sum
-        }, '')
-        if (this.useRefTable) {
-            return `SELECT\n${part1}FROM {{ ref('${table.text}') }}${this.sql.substring(table.stop, fromClause.stop)}`
-        } else {
-            return `SELECT\n${part1}${fromClause.text}`
-        }
-
-    }
 
 }
