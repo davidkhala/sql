@@ -4,18 +4,19 @@ import assert from "assert";
 
 describe('insert', () => {
 
-    it('insert into: keep fromClause', () => {
+    it('dbt sample: keep fromClause', () => {
         const sql = `INSERT INTO returned_orders (order_id, order_date, total_return)
                      SELECT order_id, order_date, total
                      FROM orders
                      WHERE type = 'return'`
-        const dbtSQL = `SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM orders WHERE type = 'return'`
+        const dbtSQL = `SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM orders
+                     WHERE type = 'return'`
         const visitor = new DBTVisitor(sql, {useRefTable: false})
         traverse(visitor)
         assert.equal(visitor.dbt, dbtSQL)
     })
 
-    it('insert into: use dbt reference', () => {
+    it('dbt sample: use dbt reference', () => {
         const sql = `INSERT INTO returned_orders (order_id, order_date, total_return)
                      SELECT order_id, order_date, total
                      FROM orders
@@ -28,7 +29,7 @@ describe('insert', () => {
 
 })
 describe('update', () => {
-    it('single column', () => {
+    it('dbt sample', () => {
 
         const sql = `UPDATE orders
                      SET type = 'return'
@@ -44,4 +45,29 @@ describe('update', () => {
 FROM {{ ref('orders') }}`
         assert.equal(visitor.dbt, dbtSQL)
     })
+})
+describe('delete', () => {
+    it('dbt sample', () => {
+        const sql = 'DELETE FROM stg_orders WHERE order_status IS NULL'
+        const visitor = new DBTVisitor(sql)
+        traverse(visitor)
+
+        const dbtSQL =
+            `WITH soft_deletes AS (
+    SELECT
+         *,
+        CASE
+            WHEN order_status IS NULL THEN true
+            ELSE false
+        END AS to_delete
+
+    FROM {{ ref('stg_orders') }}
+
+)
+
+SELECT * FROM soft_deletes WHERE to_delete = false`
+        assert.equal(visitor.dbt, dbtSQL)
+    })
+
+
 })
