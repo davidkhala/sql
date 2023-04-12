@@ -6,7 +6,10 @@ export function processDelete(context, visitor) {
         result.table = visitor.getText(context)
     }
 
-    if (expectTrace(context, ['SingleDeleteStatementContext', 'PredicateExpressionContext'])) {
+    if (
+        expectTrace(context, ['SingleDeleteStatementContext', 'PredicateExpressionContext'])||
+        expectTrace(context,['SingleDeleteStatementContext', 'LogicalExpressionContext'])
+    ) {
         result.predicate = visitor.getText(context)
     }
 }
