@@ -1,11 +1,30 @@
+/**
+ * @typedef {Error} ANTLRError
+ * @property {number} startLine
+ * @property {number} endLine
+ * @property {number} startCol
+ * @property {number} endCol
+ * @property {string} message
+ */
+
 import {GenericSQL, SqlParserVisitor} from 'dt-sql-parser';
 import * as assert from "assert";
 
 const parser = new GenericSQL();
 
+/**
+ * @throws {errors:ANTLRError[]}
+ * @param sql
+ */
 export function validate(sql) {
     const errors = parser.validate(sql);
-    assert.equal(errors.length, 0)
+    if (errors.length > 0) {
+        errors.forEach(err => console.error(err))
+        const err = Error(JSON.stringify(errors))
+        Object.assign(err, {errors})
+        throw err
+    }
+
 }
 
 export function parse(sql, pretty) {
