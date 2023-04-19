@@ -1,5 +1,6 @@
 import {traverse} from "../sql.js";
 import {DBTVisitor} from '../dbt/visitor.js'
+import {build} from '../dbt/configBlock.js'
 import assert from "assert";
 
 describe('insert', () => {
@@ -70,4 +71,19 @@ SELECT * FROM soft_deletes WHERE to_delete = false`
     })
 
 
+})
+describe('configBlock', function () {
+    it('', () => {
+        const configs = {
+            materialized: 'incremental',
+            unique_key: 'date_day'
+        }
+        const result = build(configs)
+        assert.equal(result, `{{
+    config(
+        materialized=incremental,
+\t\tunique_key=date_day
+    )
+}}`)
+    })
 })
