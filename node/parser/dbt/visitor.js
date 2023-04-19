@@ -6,9 +6,9 @@ import {processUpdate, reduceUpdate} from "./update.js";
 import {processDelete, reduceDelete} from "./delete.js";
 
 export class DBTVisitor extends AbstractVisitor {
-    constructor(sql, {useRefTable = true, debug= false} = {}) {
+    constructor(sql, {useRefTable = true, debug = false, options} = {}) {
         super(sql);
-        Object.assign(this, {useRefTable,debug, result: {}})
+        Object.assign(this, {useRefTable, debug, result: {}, options})
     }
 
     visitInsertStatement(ctx) {
@@ -33,16 +33,16 @@ export class DBTVisitor extends AbstractVisitor {
         this.dbt = reduceUpdate(this)
         return super.visitUpdateStatement(ctx);
     }
-    visitDeleteStatement(ctx) {
-        this.result.delete = {
 
-        }
+    visitDeleteStatement(ctx) {
+        this.result.delete = {}
         traverseChildren(ctx, processDelete, this)
         this.dbt = reduceDelete(this)
         return super.visitDeleteStatement(ctx);
     }
+
     visitSqlStatement(ctx) {
-        if(this.debug){
+        if (this.debug) {
             consolePrintVisitor(ctx, this)
         }
         return super.visitSqlStatements(ctx);

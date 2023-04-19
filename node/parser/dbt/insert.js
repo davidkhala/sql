@@ -1,5 +1,6 @@
 import {expectTrace} from "../traverse.js";
 import {getEnd} from "../context.js";
+import {build} from "./configBlock.js";
 
 
 export function processInsert(context, visitor) {
@@ -31,9 +32,11 @@ export function reduceInsert(visitor) {
 
     const part1 = uidList.map((uid, index) => `\t${selectColumnElementList[index]} AS ${uid}`).join(',\n')
     if (visitor.useRefTable) {
-        return `SELECT\n${part1}\nFROM {{ ref('${table.text}') }} ${visitor.sql.substring(table.stop, fromClause.stop).trim()}`
+        return `${build(visitor.options)}
+SELECT\n${part1}\nFROM {{ ref('${table.text}') }} ${visitor.sql.substring(table.stop, fromClause.stop).trim()}`
     } else {
-        return `SELECT\n${part1}\n${fromClause.text}`
+        return `${build(visitor.options)}
+SELECT\n${part1}\n${fromClause.text}`
     }
 
 }

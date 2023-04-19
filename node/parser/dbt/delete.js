@@ -1,4 +1,5 @@
 import {expectTrace} from "../traverse.js";
+import {build} from './configBlock.js'
 
 export function processDelete(context, visitor) {
     const result = visitor.result.delete
@@ -6,16 +7,16 @@ export function processDelete(context, visitor) {
         result.table = visitor.getText(context)
     }
 
-    if (
-        expectTrace(context, ['SingleDeleteStatementContext', 'PredicateExpressionContext'])||
-        expectTrace(context,['SingleDeleteStatementContext', 'LogicalExpressionContext'])
-    ) {
+    if (expectTrace(context, ['SingleDeleteStatementContext', 'PredicateExpressionContext']) ||
+        expectTrace(context, ['SingleDeleteStatementContext', 'LogicalExpressionContext'])) {
         result.predicate = visitor.getText(context)
     }
 }
-export function reduceDelete(visitor){
+
+export function reduceDelete(visitor) {
     const result = visitor.result.delete
-    return `WITH soft_deletes AS (
+    return `${build(visitor.options)}
+WITH soft_deletes AS (
     SELECT
          *,
         CASE

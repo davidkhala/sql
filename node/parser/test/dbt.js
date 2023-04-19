@@ -10,7 +10,12 @@ describe('insert', () => {
                      SELECT order_id, order_date, total
                      FROM orders
                      WHERE type = 'return'`
-        const dbtSQL = `SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM orders
+        const dbtSQL = `{{
+    config(
+        
+    )
+}}
+SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM orders
                      WHERE type = 'return'`
         const visitor = new DBTVisitor(sql, {useRefTable: false})
         traverse(visitor)
@@ -22,7 +27,12 @@ describe('insert', () => {
                      SELECT order_id, order_date, total
                      FROM orders
                      WHERE type = 'return'`
-        const dbtSQL = `SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM {{ ref('orders') }} WHERE type = 'return'`
+        const dbtSQL = `{{
+    config(
+        
+    )
+}}
+SELECT\n\torder_id AS order_id,\n\torder_date AS order_date,\n\ttotal AS total_return\nFROM {{ ref('orders') }} WHERE type = 'return'`
         const visitor = new DBTVisitor(sql)
         traverse(visitor)
         assert.equal(visitor.dbt, dbtSQL)
@@ -37,7 +47,12 @@ describe('update', () => {
                      WHERE total < 0`
         const visitor = new DBTVisitor(sql)
         traverse(visitor)
-        const dbtSQL = `SELECT
+        const dbtSQL = `{{
+    config(
+        
+    )
+}}
+SELECT
 \t{{ dbt_utils.star(from=ref('orders'), except=['type']) }},
 \tCASE
 \t\tWHEN total < 0 THEN 'return'
@@ -54,7 +69,12 @@ describe('delete', () => {
         traverse(visitor)
 
         const dbtSQL =
-            `WITH soft_deletes AS (
+            `{{
+    config(
+        
+    )
+}}
+WITH soft_deletes AS (
     SELECT
          *,
         CASE
