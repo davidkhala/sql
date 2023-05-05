@@ -7,8 +7,9 @@
  * @property {string} message
  */
 
-import {GenericSQL, SqlParserVisitor} from 'dt-sql-parser';
-import * as assert from "assert";
+import {GenericSQL, SqlParserVisitor, SqlParserListener} from 'dt-sql-parser';
+import {FromContext} from './context.js'
+import {consolePrintVisitor} from "./debug.js";
 
 const parser = new GenericSQL();
 
@@ -47,6 +48,11 @@ export function traverse(visitor) {
     visitor.visit(tree)
 }
 
+export function bind(listener) {
+    const tree = parser.parse(listener.sql)
+    parser.listen(listener, tree);
+}
+
 export class AbstractVisitor extends SqlParserVisitor {
     constructor(sql) {
         super();
@@ -54,15 +60,33 @@ export class AbstractVisitor extends SqlParserVisitor {
     }
 
     getText(context) {
-        if (!context.start) {
-            assert.ok(context.symbol)
-            return context.getText()
+        return new FromContext(context).getText(this)
+    }
+
+    visitSqlStatement(ctx) {
+        if (this.debug) {
+            consolePrintVisitor(ctx, this)
         }
-        const {start} = context.start
-        const {stop} = context.stop
-        return this.sql.substring(start, stop + 1)
+        super.visitSqlStatement(ctx);
     }
 
 }
 
+export class AbstractListener extends SqlParserListener {
+    constructor(sql) {
+        super();
+        this.sql = sql
+    }
+
+    getText(context) {
+        return new FromContext(context).getText(this)
+    }
+
+    enterSqlStatement(ctx) {
+        if (this.debug) {
+            consolePrintVisitor(ctx, this)
+        }
+        super.enterSqlStatement(ctx);
+    }
+}
 

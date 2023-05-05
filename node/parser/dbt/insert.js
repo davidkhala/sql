@@ -1,27 +1,28 @@
 import {expectTrace} from "../traverse.js";
-import {getEnd} from "../context.js";
+import {FromContext} from "../context.js";
 import {build} from "./configBlock.js";
 
 
 export function processInsert(context, visitor) {
     const result = visitor.result.insert
+    const contextWrap = new FromContext(context)
     if (expectTrace(context, ['InsertStatementContext', 'UidListContext', 'UidContext'])) {
-        result.uidList.push(visitor.getText(context))
+        result.uidList.push(contextWrap.getText(visitor))
     }
     if (expectTrace(context, ['InsertStatementContext', 'InsertStatementValueContext', 'SimpleSelectContext', 'QuerySpecificationContext', 'SelectElementsContext', 'SelectColumnElementContext'])) {
-        result.selectColumnElementList.push(visitor.getText(context))
+        result.selectColumnElementList.push(contextWrap.getText(visitor))
     }
     if (expectTrace(context, ['InsertStatementContext', 'InsertStatementValueContext', 'SimpleSelectContext', 'QuerySpecificationContext', 'FromClauseContext'])) {
         result.fromClause = {
-            text: visitor.getText(context),
-            stop: getEnd(context),
+            text: contextWrap.getText(visitor),
+            stop: contextWrap.getEnd(),
         }
 
     }
     if (expectTrace(context, ['InsertStatementContext', 'InsertStatementValueContext', 'SimpleSelectContext', 'QuerySpecificationContext', 'FromClauseContext', 'TableSourcesContext'])) {
         result.table = {
-            text: visitor.getText(context),
-            stop: getEnd(context),
+            text: contextWrap.getText(visitor),
+            stop: contextWrap.getEnd(),
         }
     }
 }

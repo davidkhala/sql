@@ -3,9 +3,9 @@ import {consolePrintVisitor} from '../debug.js'
 
 class Visitor extends AbstractVisitor {
 
-    visitDmlStatement(ctx) {
-        consolePrintVisitor(ctx, this)
-        return super.visitDmlStatement(ctx);
+    constructor(sql) {
+        super(sql);
+        this.debug = true
     }
 
 }
