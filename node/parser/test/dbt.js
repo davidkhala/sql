@@ -1,4 +1,4 @@
-import {bind} from "../sql.js";
+import { bind} from "../sql.js";
 import {DBTListener} from '../dbt/visitor.js'
 import {build} from '../dbt/configBlock.js'
 import assert from "assert";

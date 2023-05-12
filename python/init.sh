@@ -1,1 +1,0 @@
-antlr4 -Dlanguage=Python3 grammar/Teradata.G4 -Xexact-output-dir -o parser/teradata
